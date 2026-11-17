@@ -1,36 +1,21 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import java.util.regex.Pattern;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 public class FormularioClientes extends JFrame {
-    private JTextField txtCodigo;
-    private JTextField txtDui;
-    private JTextField txtNombre;
-    private JTextField txtTelefono;
-    private JTextField txtCorreo;
-    private JTextField txtDireccion;
+
+    private JTextField txtCodigo, txtDui, txtNombre, txtTelefono,
+            txtCorreo, txtDireccion;
     private JComboBox<String> cmbEstado;
     private JTable tblClientes;
     private DefaultTableModel modeloTabla;
@@ -39,11 +24,14 @@ public class FormularioClientes extends JFrame {
 
     public FormularioClientes() {
         super("Gestión de Clientes");
+
         try {
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+            UIManager.setLookAndFeel(
+                    "javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         clienteDAO = new ClienteDAO();
         initComponents();
         cargarClientes();
@@ -62,10 +50,10 @@ public class FormularioClientes extends JFrame {
         header.setBackground(new Color(31, 58, 95));
         header.setBorder(new EmptyBorder(18, 22, 18, 22));
 
-        JLabel titleLabel = new JLabel("Gestión de Clientes");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        titleLabel.setForeground(Color.WHITE);
-        header.add(titleLabel, BorderLayout.WEST);
+        JLabel title = new JLabel("Gestión de Clientes");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
+        header.add(title, BorderLayout.WEST);
         add(header, BorderLayout.NORTH);
 
         JPanel content = new JPanel(new BorderLayout(16, 16));
@@ -75,11 +63,12 @@ public class FormularioClientes extends JFrame {
         JPanel formWrapper = new JPanel(new BorderLayout(10, 14));
         formWrapper.setBackground(Color.WHITE);
         formWrapper.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(214, 220, 232), 1),
+                BorderFactory.createLineBorder(new Color(214, 220, 232)),
                 new EmptyBorder(12, 12, 12, 12)));
 
-        JPanel panelFormulario = new JPanel(new GridBagLayout());
-        panelFormulario.setBackground(Color.WHITE);
+        JPanel formulario = new JPanel(new GridBagLayout());
+        formulario.setBackground(Color.WHITE);
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -90,38 +79,55 @@ public class FormularioClientes extends JFrame {
         txtTelefono = new JTextField();
         txtCorreo = new JTextField();
         txtDireccion = new JTextField();
-        cmbEstado = new JComboBox<>(new String[]{"Activo", "Inactivo", "Bloqueado"});
 
-        agregarCampo(panelFormulario, gbc, 0, "Código:", txtCodigo, "Código del cliente");
-        agregarCampo(panelFormulario, gbc, 1, "DUI:", txtDui, "00000000-0");
-        agregarCampo(panelFormulario, gbc, 2, "Nombre:", txtNombre, "Nombre completo del cliente");
-        agregarCampo(panelFormulario, gbc, 3, "Teléfono:", txtTelefono, "Número de contacto");
-        agregarCampo(panelFormulario, gbc, 4, "Correo:", txtCorreo, "correo@ejemplo.com");
-        agregarCampo(panelFormulario, gbc, 5, "Dirección:", txtDireccion, "Dirección completa");
-        agregarCombo(panelFormulario, gbc, 6, "Estado:", cmbEstado, "Estado del cliente");
+        cmbEstado = new JComboBox<>(
+                new String[] { "Activo", "Inactivo", "Bloqueado" });
 
-        JPanel panelBotones = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 12, 10));
-        panelBotones.setOpaque(false);
+        agregarCampo(formulario, gbc, 0, "Código:", txtCodigo,
+                "Código del cliente");
+        agregarCampo(formulario, gbc, 1, "DUI:", txtDui,
+                "00000000-0");
+        agregarCampo(formulario, gbc, 2, "Nombre:", txtNombre,
+                "Nombre completo");
+        agregarCampo(formulario, gbc, 3, "Teléfono:", txtTelefono,
+                "7654-3210");
+        agregarCampo(formulario, gbc, 4, "Correo:", txtCorreo,
+                "correo@ejemplo.com");
+        agregarCampo(formulario, gbc, 5, "Dirección:", txtDireccion,
+                "Dirección completa");
+        agregarCombo(formulario, gbc, 6, "Estado:", cmbEstado,
+                "Estado del cliente");
 
-        JButton btnGuardar = crearBoton("Guardar", new Color(46, 158, 91), new Color(35, 132, 75));
-        JButton btnActualizar = crearBoton("Actualizar", new Color(47, 128, 237), new Color(33, 103, 197));
-        JButton btnEliminar = crearBoton("Eliminar", new Color(214, 69, 69), new Color(173, 48, 48));
-        JButton btnLimpiar = crearBoton("Limpiar", new Color(122, 134, 154), new Color(96, 107, 124));
+        JPanel botones = new JPanel();
+        botones.setOpaque(false);
+
+        JButton btnGuardar = crearBoton("Guardar",
+                new Color(46, 158, 91), new Color(35, 132, 75));
+        JButton btnActualizar = crearBoton("Actualizar",
+                new Color(47, 128, 237), new Color(33, 103, 197));
+        JButton btnEliminar = crearBoton("Eliminar",
+                new Color(214, 69, 69), new Color(173, 48, 48));
+        JButton btnLimpiar = crearBoton("Limpiar",
+                new Color(122, 134, 154), new Color(96, 107, 124));
 
         btnGuardar.addActionListener(e -> guardarCliente());
         btnActualizar.addActionListener(e -> actualizarCliente());
         btnEliminar.addActionListener(e -> eliminarCliente());
         btnLimpiar.addActionListener(e -> limpiarCampos());
 
-        panelBotones.add(btnGuardar);
-        panelBotones.add(btnActualizar);
-        panelBotones.add(btnEliminar);
-        panelBotones.add(btnLimpiar);
+        botones.add(btnGuardar);
+        botones.add(btnActualizar);
+        botones.add(btnEliminar);
+        botones.add(btnLimpiar);
 
-        formWrapper.add(panelFormulario, BorderLayout.CENTER);
-        formWrapper.add(panelBotones, BorderLayout.SOUTH);
+        formWrapper.add(formulario, BorderLayout.CENTER);
+        formWrapper.add(botones, BorderLayout.SOUTH);
 
-        String[] columnas = {"ID", "Código", "DUI", "Nombre", "Teléfono", "Correo", "Dirección", "Estado"};
+        String[] columnas = {
+                "ID", "Código", "DUI", "Nombre",
+                "Teléfono", "Correo", "Dirección", "Estado"
+        };
+
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -130,40 +136,37 @@ public class FormularioClientes extends JFrame {
         };
 
         tblClientes = new JTable(modeloTabla);
-        tblClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblClientes.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION);
         tblClientes.setRowHeight(28);
         tblClientes.setFillsViewportHeight(true);
         tblClientes.setShowGrid(false);
-        tblClientes.setIntercellSpacing(new java.awt.Dimension(0, 1));
         tblClientes.setSelectionBackground(new Color(174, 213, 255));
         tblClientes.setSelectionForeground(new Color(17, 24, 39));
         tblClientes.getTableHeader().setReorderingAllowed(false);
-        tblClientes.getTableHeader().setBackground(new Color(31, 58, 95));
+        tblClientes.getTableHeader().setBackground(
+                new Color(31, 58, 95));
         tblClientes.getTableHeader().setForeground(Color.WHITE);
-        tblClientes.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tblClientes.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tblClientes.setRowMargin(2);
-        tblClientes.setOpaque(true);
-        tblClientes.setBackground(Color.WHITE);
-        tblClientes.setGridColor(new Color(232, 235, 240));
+        tblClientes.getTableHeader().setFont(
+                new Font("Segoe UI", Font.BOLD, 13));
+
         tblClientes.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting() && tblClientes.getSelectedRow() != -1) {
+            if (!e.getValueIsAdjusting()
+                    && tblClientes.getSelectedRow() != -1) {
                 cargarClienteSeleccionado(tblClientes.getSelectedRow());
             }
         });
 
-        JTableHeader headerTable = tblClientes.getTableHeader();
-        headerTable.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        headerTable.setPreferredSize(new Dimension(0, 34));
+        JTableHeader th = tblClientes.getTableHeader();
+        th.setPreferredSize(new Dimension(0, 34));
 
-        tblClientes.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblClientes.getColumnModel().getColumn(1).setPreferredWidth(90);
-        tblClientes.getColumnModel().getColumn(2).setPreferredWidth(120);
-        tblClientes.getColumnModel().getColumn(3).setPreferredWidth(190);
-        tblClientes.getColumnModel().getColumn(4).setPreferredWidth(110);
-        tblClientes.getColumnModel().getColumn(5).setPreferredWidth(170);
-        tblClientes.getColumnModel().getColumn(6).setPreferredWidth(220);
-        tblClientes.getColumnModel().getColumn(7).setPreferredWidth(90);
+        int[] anchos = { 50, 90, 120, 190, 110, 170, 220, 90 };
+
+        for (int i = 0; i < anchos.length; i++) {
+            tblClientes.getColumnModel()
+                    .getColumn(i)
+                    .setPreferredWidth(anchos[i]);
+        }
 
         JScrollPane scroll = new JScrollPane(tblClientes);
         scroll.setBorder(BorderFactory.createEmptyBorder());
@@ -174,11 +177,14 @@ public class FormularioClientes extends JFrame {
         add(content, BorderLayout.CENTER);
     }
 
-    private void agregarCampo(JPanel panel, GridBagConstraints gbc, int fila, String texto, JTextField campo, String tooltip) {
+    private void agregarCampo(JPanel panel, GridBagConstraints gbc,
+            int fila, String texto, JTextField campo, String tooltip) {
+
         gbc.gridx = 0;
         gbc.gridy = fila;
         gbc.weightx = 0.15;
         gbc.anchor = GridBagConstraints.LINE_END;
+
         JLabel label = new JLabel(texto);
         label.setFont(new Font("Segoe UI", Font.BOLD, 14));
         label.setForeground(new Color(38, 46, 60));
@@ -187,21 +193,27 @@ public class FormularioClientes extends JFrame {
         gbc.gridx = 1;
         gbc.weightx = 0.85;
         gbc.anchor = GridBagConstraints.LINE_START;
+
         campo.setToolTipText(tooltip);
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setPreferredSize(new Dimension(0, 36));
         campo.setBackground(Color.WHITE);
         campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(202, 208, 218), 1),
+                BorderFactory.createLineBorder(new Color(202, 208, 218)),
                 new EmptyBorder(7, 10, 7, 10)));
+
         panel.add(campo, gbc);
     }
 
-    private void agregarCombo(JPanel panel, GridBagConstraints gbc, int fila, String texto, JComboBox<String> campo, String tooltip) {
+    private void agregarCombo(JPanel panel, GridBagConstraints gbc,
+            int fila, String texto, JComboBox<String> campo,
+            String tooltip) {
+
         gbc.gridx = 0;
         gbc.gridy = fila;
         gbc.weightx = 0.15;
         gbc.anchor = GridBagConstraints.LINE_END;
+
         JLabel label = new JLabel(texto);
         label.setFont(new Font("Segoe UI", Font.BOLD, 14));
         label.setForeground(new Color(38, 46, 60));
@@ -209,14 +221,11 @@ public class FormularioClientes extends JFrame {
 
         gbc.gridx = 1;
         gbc.weightx = 0.85;
-        gbc.anchor = GridBagConstraints.LINE_START;
+
         campo.setToolTipText(tooltip);
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setPreferredSize(new Dimension(0, 36));
-        campo.setBackground(Color.WHITE);
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(202, 208, 218), 1),
-                new EmptyBorder(0, 8, 0, 8)));
+
         panel.add(campo, gbc);
     }
 
@@ -227,9 +236,8 @@ public class FormularioClientes extends JFrame {
         boton.setBackground(base);
         boton.setFocusPainted(false);
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        boton.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
-        boton.setOpaque(true);
         boton.setPreferredSize(new Dimension(140, 40));
+
         boton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -241,89 +249,211 @@ public class FormularioClientes extends JFrame {
                 boton.setBackground(base);
             }
         });
+
         return boton;
     }
 
+    private boolean validarCampos() {
+        String codigo = txtCodigo.getText().trim();
+        String dui = txtDui.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String telefono = txtTelefono.getText().trim();
+        String correo = txtCorreo.getText().trim();
+        String direccion = txtDireccion.getText().trim();
+
+        if (codigo.isEmpty()) {
+            mostrarError("El código del cliente es obligatorio.");
+            txtCodigo.requestFocus();
+            return false;
+        }
+
+        if (dui.isEmpty()) {
+            mostrarError("El DUI es obligatorio.");
+            txtDui.requestFocus();
+            return false;
+        }
+
+        if (!dui.matches("\\d{8}-\\d")) {
+            mostrarError("El DUI debe tener el formato 00000000-0.");
+            txtDui.requestFocus();
+            return false;
+        }
+
+        if (nombre.isEmpty()) {
+            mostrarError("El nombre completo es obligatorio.");
+            txtNombre.requestFocus();
+            return false;
+        }
+
+        if (direccion.isEmpty()) {
+            mostrarError("La dirección es obligatoria.");
+            txtDireccion.requestFocus();
+            return false;
+        }
+
+        if (!telefono.isEmpty()) {
+            String tel = telefono.replace("-", "");
+
+            if (!tel.matches("\\d{8}")) {
+                mostrarError(
+                        "El teléfono debe tener 8 dígitos.\n"
+                                + "Ejemplo: 7654-3210");
+                txtTelefono.requestFocus();
+                return false;
+            }
+
+            txtTelefono.setText(tel);
+        }
+
+        if (!correo.isEmpty()) {
+            String patron = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
+            if (!Pattern.matches(patron, correo)) {
+                mostrarError(
+                        "El correo no tiene un formato válido.\n"
+                                + "Ejemplo: usuario@correo.com");
+                txtCorreo.requestFocus();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(
+                this,
+                mensaje,
+                "Validación",
+                JOptionPane.WARNING_MESSAGE);
+    }
+
     private void guardarCliente() {
-        if (txtCodigo.getText().trim().isEmpty() || txtDui.getText().trim().isEmpty()
-                || txtNombre.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe llenar al menos Código, DUI y Nombre.", "Validación", JOptionPane.WARNING_MESSAGE);
+        if (!validarCampos()) {
             return;
         }
 
         Cliente cliente = new Cliente();
+
         cliente.setCodigoCliente(txtCodigo.getText().trim());
         cliente.setDui(txtDui.getText().trim());
         cliente.setNombreCompleto(txtNombre.getText().trim());
         cliente.setTelefono(txtTelefono.getText().trim());
-        cliente.setCorreoElectronico(txtCorreo.getText().trim());
+
+        String correo = txtCorreo.getText().trim();
+        cliente.setCorreoElectronico(
+                correo.isEmpty() ? null : correo);
+
         cliente.setDireccion(txtDireccion.getText().trim());
-        cliente.setEstado((String) cmbEstado.getSelectedItem());
+        cliente.setEstado(
+                (String) cmbEstado.getSelectedItem());
 
         if (clienteDAO.insertar(cliente)) {
-            JOptionPane.showMessageDialog(this, "Cliente guardado correctamente.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Cliente guardado correctamente.");
+
             cargarClientes();
             limpiarCampos();
         } else {
-            JOptionPane.showMessageDialog(this, "No se pudo guardar el cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    clienteDAO.getUltimoError(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void actualizarCliente() {
         if (idClienteSeleccionado == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un cliente de la tabla para actualizar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Seleccione un cliente para actualizar.",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (!validarCampos()) {
             return;
         }
 
         Cliente cliente = new Cliente();
+
         cliente.setIdCliente(idClienteSeleccionado);
         cliente.setCodigoCliente(txtCodigo.getText().trim());
         cliente.setDui(txtDui.getText().trim());
         cliente.setNombreCompleto(txtNombre.getText().trim());
         cliente.setTelefono(txtTelefono.getText().trim());
-        cliente.setCorreoElectronico(txtCorreo.getText().trim());
+
+        String correo = txtCorreo.getText().trim();
+        cliente.setCorreoElectronico(
+                correo.isEmpty() ? null : correo);
+
         cliente.setDireccion(txtDireccion.getText().trim());
-        cliente.setEstado((String) cmbEstado.getSelectedItem());
+        cliente.setEstado(
+                (String) cmbEstado.getSelectedItem());
 
         if (clienteDAO.actualizar(cliente)) {
-            JOptionPane.showMessageDialog(this, "Cliente actualizado correctamente.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Cliente actualizado correctamente.");
+
             cargarClientes();
             limpiarCampos();
         } else {
-            JOptionPane.showMessageDialog(this, "No se pudo actualizar el cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    clienteDAO.getUltimoError(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void eliminarCliente() {
         if (idClienteSeleccionado == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un cliente para eliminar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Seleccione un cliente para eliminar.",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int respuesta = JOptionPane.showConfirmDialog(this,
+        int respuesta = JOptionPane.showConfirmDialog(
+                this,
                 "¿Desea eliminar el cliente seleccionado?",
                 "Confirmación",
                 JOptionPane.YES_NO_OPTION);
 
         if (respuesta == JOptionPane.YES_OPTION) {
             if (clienteDAO.eliminar(idClienteSeleccionado)) {
-                JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente.");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Cliente eliminado correctamente.");
+
                 cargarClientes();
                 limpiarCampos();
             } else {
-                JOptionPane.showMessageDialog(this, "No se pudo eliminar el cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No se pudo eliminar el cliente.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void limpiarCampos() {
         idClienteSeleccionado = -1;
+
         txtCodigo.setText("");
         txtDui.setText("");
         txtNombre.setText("");
         txtTelefono.setText("");
         txtCorreo.setText("");
         txtDireccion.setText("");
+
         cmbEstado.setSelectedIndex(0);
         tblClientes.clearSelection();
         txtCodigo.requestFocus();
@@ -331,8 +461,9 @@ public class FormularioClientes extends JFrame {
 
     private void cargarClientes() {
         modeloTabla.setRowCount(0);
+
         for (Cliente cliente : clienteDAO.listar()) {
-            modeloTabla.addRow(new Object[]{
+            modeloTabla.addRow(new Object[] {
                     cliente.getIdCliente(),
                     cliente.getCodigoCliente(),
                     cliente.getDui(),
@@ -345,15 +476,22 @@ public class FormularioClientes extends JFrame {
         }
     }
 
-    private void cargarClienteSeleccionado(int filaSeleccionada) {
-        idClienteSeleccionado = Integer.parseInt(modeloTabla.getValueAt(filaSeleccionada, 0).toString());
-        txtCodigo.setText(modeloTabla.getValueAt(filaSeleccionada, 1).toString());
-        txtDui.setText(modeloTabla.getValueAt(filaSeleccionada, 2).toString());
-        txtNombre.setText(modeloTabla.getValueAt(filaSeleccionada, 3).toString());
-        txtTelefono.setText(modeloTabla.getValueAt(filaSeleccionada, 4).toString());
-        txtCorreo.setText(modeloTabla.getValueAt(filaSeleccionada, 5).toString());
-        txtDireccion.setText(modeloTabla.getValueAt(filaSeleccionada, 6).toString());
-        cmbEstado.setSelectedItem(modeloTabla.getValueAt(filaSeleccionada, 7).toString());
+    private void cargarClienteSeleccionado(int fila) {
+        idClienteSeleccionado = Integer.parseInt(
+                valorSeguro(fila, 0));
+
+        txtCodigo.setText(valorSeguro(fila, 1));
+        txtDui.setText(valorSeguro(fila, 2));
+        txtNombre.setText(valorSeguro(fila, 3));
+        txtTelefono.setText(valorSeguro(fila, 4));
+        txtCorreo.setText(valorSeguro(fila, 5));
+        txtDireccion.setText(valorSeguro(fila, 6));
+        cmbEstado.setSelectedItem(valorSeguro(fila, 7));
+    }
+
+    private String valorSeguro(int fila, int columna) {
+        Object valor = modeloTabla.getValueAt(fila, columna);
+        return valor == null ? "" : valor.toString();
     }
 
     public static void main(String[] args) {
