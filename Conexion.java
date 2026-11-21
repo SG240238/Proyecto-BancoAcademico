@@ -23,4 +23,8 @@ public class Conexion {
             return null;
         }
     }
+
+    public static Connection getConexion() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
 }
