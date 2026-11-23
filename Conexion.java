@@ -3,11 +3,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Conexion {
-    private static final String URL = "jdbc:mysql://localhost:3306/banco_academico_db?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "1234";
+    private static final String URL = obtenerVariable(
+            "BANCO_DB_URL",
+            "jdbc:mysql://localhost:3306/banco_academico_db?useSSL=false&serverTimezone=UTC");
+    private static final String USER = obtenerVariable("BANCO_DB_USER", "root");
+    private static final String PASSWORD = obtenerVariable("BANCO_DB_PASSWORD", "");
 
     private Conexion() {
+    }
+
+    private static String obtenerVariable(String nombre, String valorPredeterminado) {
+        String valor = System.getenv(nombre);
+        return valor == null ? valorPredeterminado : valor;
     }
 
     public static Connection getConnection() {
@@ -25,6 +32,11 @@ public class Conexion {
     }
 
     public static Connection getConexion() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        Connection conexion = getConnection();
+        if (conexion == null) {
+            throw new SQLException(
+                    "No se pudo establecer conexión con la base de datos.");
+        }
+        return conexion;
     }
 }

@@ -18,33 +18,40 @@ public class CuentaDAO {
                 + "WHERE id_cliente = ? "
                 + "ORDER BY id_cuenta";
 
-        try (Connection con = obtenerConexion();
-                PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = obtenerConexion()) {
+            if (con == null) {
+                System.err.println(
+                        "Error al listar cuentas: no hay conexión con MySQL.");
+                return lista;
+            }
 
-            ps.setInt(1, idCliente);
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
 
-            try (ResultSet rs = ps.executeQuery()) {
+                ps.setInt(1, idCliente);
 
-                while (rs.next()) {
+                try (ResultSet rs = ps.executeQuery()) {
 
-                    Cuenta cuenta = new Cuenta();
+                    while (rs.next()) {
 
-                    cuenta.setIdCuenta(
-                            rs.getInt("id_cuenta"));
+                        Cuenta cuenta = new Cuenta();
 
-                    cuenta.setNumeroCuenta(
-                            rs.getString("numero_cuenta"));
+                        cuenta.setIdCuenta(
+                                rs.getInt("id_cuenta"));
 
-                    cuenta.setIdCliente(
-                            rs.getInt("id_cliente"));
+                        cuenta.setNumeroCuenta(
+                                rs.getString("numero_cuenta"));
 
-                    cuenta.setSaldo(
-                            rs.getDouble("saldo"));
+                        cuenta.setIdCliente(
+                                rs.getInt("id_cliente"));
 
-                    cuenta.setEstado(
-                            rs.getString("estado"));
+                        cuenta.setSaldo(
+                                rs.getDouble("saldo"));
 
-                    lista.add(cuenta);
+                        cuenta.setEstado(
+                                rs.getString("estado"));
+
+                        lista.add(cuenta);
+                    }
                 }
             }
 
@@ -61,6 +68,9 @@ public class CuentaDAO {
     public boolean depositar(
             int idCuenta,
             double monto) {
+        if (!Double.isFinite(monto) || monto <= 0) {
+            return false;
+        }
 
         String actualizar = "UPDATE cuentas SET saldo = saldo + ? "
                 + "WHERE id_cuenta = ? "
@@ -71,6 +81,9 @@ public class CuentaDAO {
                 + "VALUES (?, 'DEPOSITO', ?, NULL)";
 
         try (Connection con = obtenerConexion()) {
+            if (con == null) {
+                return false;
+            }
 
             con.setAutoCommit(false);
 
@@ -110,14 +123,10 @@ public class CuentaDAO {
     public boolean retirar(
             int idCuenta,
             double monto) {
+        if (!Double.isFinite(monto) || monto <= 0) {
+            return false;
+        }
 
-        /*
-         * El retiro solamente se permite si:
-         *
-         * 1. La cuenta está ACTIVA.
-         * 2. El cliente está ACTIVO.
-         * 3. Hay saldo suficiente.
-         */
         String actualizar = "UPDATE cuentas c "
                 + "INNER JOIN clientes cl "
                 + "ON c.id_cliente = cl.id_cliente "
@@ -132,6 +141,9 @@ public class CuentaDAO {
                 + "VALUES (?, 'RETIRO', ?, NULL)";
 
         try (Connection con = obtenerConexion()) {
+            if (con == null) {
+                return false;
+            }
 
             con.setAutoCommit(false);
 

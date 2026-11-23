@@ -795,7 +795,9 @@ public class FormularioClientes extends JFrame {
             JOptionPane.showMessageDialog(
                     this,
                     "No se pudo guardar el cliente.\n"
-                            + "Verifique que el código y DUI no estén registrados.",
+                            + (clienteDAO.getUltimoError().isEmpty()
+                                    ? "Verifique que el código y DUI no estén registrados."
+                                    : clienteDAO.getUltimoError()),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -876,7 +878,9 @@ public class FormularioClientes extends JFrame {
             JOptionPane.showMessageDialog(
                     this,
                     "No se pudo actualizar el cliente.\n"
-                            + "Verifique que el código y DUI no estén registrados en otro cliente.",
+                            + (clienteDAO.getUltimoError().isEmpty()
+                                    ? "Verifique que el código y DUI no estén registrados en otro cliente."
+                                    : clienteDAO.getUltimoError()),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }

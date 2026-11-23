@@ -40,7 +40,7 @@ public class ReporteDAO {
 
         String sql =
                 "SELECT ca.numero_cuenta, " +
-                "CONCAT(c.nombre, ' ', c.apellido) AS cliente, " +
+                "c.nombre_completo AS cliente, " +
                 "ca.saldo, ca.estado " +
                 "FROM cuentas ca " +
                 "INNER JOIN clientes c ON ca.id_cliente = c.id_cliente " +
@@ -76,9 +76,9 @@ public class ReporteDAO {
 
     public DefaultTableModel reporteClientesRegistrados() throws SQLException {
         DefaultTableModel modelo = crearModelo(
-                "ID cliente", "Nombre", "Apellido", "DUI", "Teléfono", "Correo");
+                "ID cliente", "Nombre completo", "DUI", "Teléfono", "Correo");
         String sql =
-                "SELECT id_cliente, nombre, apellido, dui, telefono, correo " +
+                "SELECT id_cliente, nombre_completo, dui, telefono, correo_electronico " +
                 "FROM clientes ORDER BY id_cliente";
 
         try (Connection conexion = Conexion.getConexion();
@@ -87,11 +87,10 @@ public class ReporteDAO {
             while (resultado.next()) {
                 modelo.addRow(new Object[] {
                     resultado.getInt("id_cliente"),
-                    resultado.getString("nombre"),
-                    resultado.getString("apellido"),
+                    resultado.getString("nombre_completo"),
                     resultado.getString("dui"),
                     resultado.getString("telefono"),
-                    resultado.getString("correo")
+                    resultado.getString("correo_electronico")
                 });
             }
         }
@@ -149,7 +148,6 @@ public class ReporteDAO {
     }
 
     public BigDecimal totalTransferido() throws SQLException {
-        // Solo se suman las filas enviadas: la fila recibida no se duplica.
         return obtenerTotal("TRANSFERENCIA_ENVIADA");
     }
 

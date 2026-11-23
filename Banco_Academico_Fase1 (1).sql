@@ -1,14 +1,3 @@
--- =========================================================
--- BANCO ACADEMICO UDB
--- FASE 1: BASE DE DATOS Y TABLA DE CLIENTES
--- Motor: MySQL / InnoDB
--- Codificacion: utf8mb4
---
--- Este archivo crea la base de datos y la tabla clientes.
--- Ejecutar este script una sola vez en MySQL Workbench.
--- No elimina datos existentes.
--- =========================================================
-
 CREATE DATABASE IF NOT EXISTS banco_academico_db
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -42,36 +31,64 @@ CREATE TABLE IF NOT EXISTS clientes (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
--- =========================================================
--- VERIFICACION DE LA ESTRUCTURA
--- =========================================================
+CREATE TABLE IF NOT EXISTS cuentas (
+    id_cuenta INT NOT NULL AUTO_INCREMENT,
+    numero_cuenta VARCHAR(20) NOT NULL,
+    id_cliente INT NOT NULL,
+    saldo DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    estado ENUM('ACTIVA', 'BLOQUEADA', 'INACTIVA')
+        NOT NULL DEFAULT 'ACTIVA',
+
+    CONSTRAINT pk_cuentas
+        PRIMARY KEY (id_cuenta),
+
+    CONSTRAINT uq_numero_cuenta
+        UNIQUE (numero_cuenta),
+
+    CONSTRAINT fk_cuentas_clientes
+        FOREIGN KEY (id_cliente)
+        REFERENCES clientes (id_cliente)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS transacciones (
+    id_transaccion INT NOT NULL AUTO_INCREMENT,
+    id_cuenta INT NOT NULL,
+    tipo ENUM(
+        'DEPOSITO',
+        'RETIRO',
+        'TRANSFERENCIA_ENVIADA',
+        'TRANSFERENCIA_RECIBIDA'
+    ) NOT NULL,
+    monto DECIMAL(12, 2) NOT NULL,
+    cuenta_relacionada INT NULL,
+    fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_transacciones
+        PRIMARY KEY (id_transaccion),
+
+    CONSTRAINT fk_transacciones_cuentas
+        FOREIGN KEY (id_cuenta)
+        REFERENCES cuentas (id_cuenta)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_transacciones_relacionada
+        FOREIGN KEY (cuenta_relacionada)
+        REFERENCES cuentas (id_cuenta)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 DESCRIBE clientes;
+DESCRIBE cuentas;
+DESCRIBE transacciones;
 
--- =========================================================
--- CONSULTA DE CLIENTES
--- =========================================================
 SELECT * FROM clientes;
-
--- =========================================================
--- DATOS DE EJEMPLO (OPCIONAL)
--- Ejecutar este bloque solo si desean cargar los 3 ejemplos.
--- Si ya existen, no volver a ejecutarlo porque las columnas
--- unicas impedirán duplicarlos.
--- =========================================================
--- INSERT INTO clientes
--- (codigo_cliente, dui, nombre_completo, telefono,
---  correo_electronico, direccion, estado)
--- VALUES
--- ('CLI-0001', '12345678-9', 'Carlos Alberto Lopez',
---  '76543210', 'carlos@gmail.com',
---  'Sonsonate, El Salvador', 'Activo'),
--- ('CLI-0002', '98765432-1', 'Maria Fernanda Garcia',
---  '71234567', 'maria@gmail.com',
---  'Izalco, Sonsonate', 'Activo'),
--- ('CLI-0003', '11223344-5', 'Jose Manuel Perez',
---  '78901234', 'jose@gmail.com',
---  'Santa Ana, El Salvador', 'Inactivo');
-
--- =========================================================
--- FIN DEL SCRIPT
--- =========================================================
+SELECT * FROM cuentas;
+SELECT * FROM transacciones;
